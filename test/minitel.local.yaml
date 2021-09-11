@@ -1,0 +1,9 @@
+# This is the local config file for your environment.
+#
+# It would typically not be committed to source control.
+
+frontend:
+  deploy: cluster
+
+backend:
+  deploy: cluster

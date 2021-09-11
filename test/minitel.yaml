@@ -1,0 +1,8 @@
+hostname: minitel.test
+app-name: minitel
+services:
+  - name: frontend
+    port: 80
+
+  - name: backend
+    port: 8000
