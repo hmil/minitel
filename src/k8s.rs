@@ -140,7 +140,6 @@ pub fn build_service_cluster_definition(config: &K8sServiceConfig) -> String {
 
         let mut selector = HashMap::new();
 
-        selector.insert("minitel-app".to_string(), ConfigValue::from("minitel"));
         selector.insert("app".to_string(), ConfigValue::from(config.app_name));
         selector.insert("tier".to_string(), ConfigValue::from(config.service_name));
 
@@ -186,7 +185,6 @@ pub fn build_service_cluster_definition(config: &K8sServiceConfig) -> String {
                 metadata.insert("name".to_string(), ConfigValue::from(config.service_name));
                 {
                     let mut labels = HashMap::new();
-                    labels.insert("minitel-app".to_string(), ConfigValue::from("minitel"));
                     labels.insert("app".to_string(), ConfigValue::from(config.app_name));
                     labels.insert("tier".to_string(), ConfigValue::from(config.service_name));
         

@@ -6,4 +6,4 @@ frontend:
   deploy: cluster
 
 backend:
-  deploy: cluster
+  deploy: local

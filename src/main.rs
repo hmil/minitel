@@ -3,7 +3,11 @@ mod hosts;
 mod minikube;
 mod k8s;
 mod docker;
+mod dev;
 
+use dev::build_development_env;
+use dev::start_development_service;
+use dev::stop_development_service;
 use docker::build_service_image;
 use k8s::ensure_tag_config;
 use minikube::get_minikube_ip;
@@ -75,8 +79,8 @@ fn deploy_to_cluster(global_config: &GlobalConfig, service: &Service) {
     kubectl_apply(&config);
 }
 
-fn deploy_local(global_config: &GlobalConfig, service: &Service) {
-    
+fn deploy_local(global_config: &GlobalConfig, service: &Service, env: &HashMap<String, String>) {
+
     let config = build_service_local_definition(& K8sServiceConfig {
         host_ip: &global_config.host_ip,
         service_name: &service.name,
@@ -86,12 +90,15 @@ fn deploy_local(global_config: &GlobalConfig, service: &Service) {
     });
 
     kubectl_apply(&config);
+
+    stop_development_service(&global_config.project_location, &service, env);
+    start_development_service(&global_config.project_location, &service, env);
 }
 
-fn start_service(global_config: &GlobalConfig, service: &Service, config: &ServiceConfig) {
+fn start_service(global_config: &GlobalConfig, service: &Service, config: &ServiceConfig, env: &HashMap<String, String>) {
     match config.deploy {
         DeployMode::Cluster => deploy_to_cluster(global_config, service),
-        DeployMode::Local => deploy_local(global_config, service)
+        DeployMode::Local => deploy_local(global_config, service, env)
     }
 }
 
@@ -153,6 +160,7 @@ fn run_up() {
 
 
     let config_hash = configure_routing(&def, &cfg);
+    let dev_env = build_development_env(&def, &cfg);
 
     let config = GlobalConfig {
         host_ip: &get_host_ip(),
@@ -170,12 +178,11 @@ fn run_up() {
         run_patch_hosts_as_sudo();
     }
 
+    for service in def.services {
+        start_service(&config, &service, cfg.get(&service.name).get_or_insert(&default_cfg), &dev_env);
+    }
 
     validate_and_apply_extras(&project_location);
-
-    for service in def.services {
-        start_service(&config, &service, cfg.get(&service.name).get_or_insert(&default_cfg));
-    }
 }
 
 fn run_patch_hosts() {

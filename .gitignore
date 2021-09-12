@@ -1,1 +1,3 @@
 /target
+.pid
+node_modules/
